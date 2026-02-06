@@ -53,8 +53,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
                            <span className="text-xs text-slate-500">2 hours ago</span>
                          </div>
                          <p className="text-sm text-slate-600 dark:text-slate-400">
-                           I've assigned this to the frontend team. Please check the viewport meta tag.
-                         </p>
+                          I&apos;ve assigned this to the frontend team. Please check the viewport meta tag.
+                        </p>
                        </div>
                     </div>
                   </div>

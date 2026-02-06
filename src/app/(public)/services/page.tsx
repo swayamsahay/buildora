@@ -1,8 +1,10 @@
-import { getServices } from "@/lib/cms/getServices";
 import ServicesClient from "./ServicesClient";
 
-export default async function ServicesPage() {
-  const services = await getServices();
+export const metadata = {
+  title: "Services | Buildora",
+  description: "Our expertise in strategy, design, development, and content.",
+};
 
-  return <ServicesClient services={services} />;
+export default function ServicesPage() {
+  return <ServicesClient />;
 }

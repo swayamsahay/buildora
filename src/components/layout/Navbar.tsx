@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { href: "/services", label: "Services" },
@@ -16,75 +17,80 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/75 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-950/75">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="text-xl font-bold text-slate-900 dark:text-slate-50">
+    <nav className="fixed top-0 z-50 w-full backdrop-blur-xl bg-white/70 dark:bg-black/60 border-b border-black/5 dark:border-white/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex h-16 items-center justify-between">
+
+          {/* BRAND */}
+          <Link href="/" className="text-lg font-semibold tracking-tight text-black dark:text-white">
             Buildora
-          </span>
-        </Link>
-        <div className="hidden md:flex md:items-center md:gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-        <div className="hidden md:flex md:items-center md:gap-4">
-          <Link href="/login">
-            <Button variant="ghost" size="sm">
+          </Link>
+
+          {/* DESKTOP NAV */}
+          <div className="hidden md:flex items-center gap-10">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white transition"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* DESKTOP ACTIONS */}
+          <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
+            <Link href="/login" className="text-sm text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white">
               Log in
+            </Link>
+            <Button size="sm" className="rounded-full px-5">
+              <Link href="/contact">Start a project</Link>
             </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm">Get Started</Button>
-          </Link>
+          </div>
+
+          {/* MOBILE BUTTON */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-black dark:text-white"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
-        <button
-          className="md:hidden"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? (
-            <X className="h-6 w-6 text-slate-900 dark:text-slate-50" />
-          ) : (
-            <Menu className="h-6 w-6 text-slate-900 dark:text-slate-50" />
-          )}
-        </button>
       </div>
 
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-b border-slate-200 bg-white px-4 py-4 md:hidden dark:border-slate-800 dark:bg-slate-950"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="md:hidden border-t border-black/5 dark:border-white/10 bg-white dark:bg-black"
           >
-            <div className="flex flex-col gap-4">
+            <div className="px-6 py-6 flex flex-col gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50"
                   onClick={() => setIsOpen(false)}
+                  className="text-base text-neutral-700 dark:text-neutral-300"
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-2 pt-4">
-                <Button variant="ghost" className="w-full justify-start" asChild>
-                  <Link href="/login" onClick={() => setIsOpen(false)}>
-                    Log in
-                  </Link>
-                </Button>
-                <Button className="w-full" asChild>
-                  <Link href="/signup" onClick={() => setIsOpen(false)}>
-                    Get Started
+
+              <div className="flex items-center gap-4 pt-4">
+                <ThemeToggle />
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                  Log in
+                </Link>
+                <Button className="rounded-full">
+                  <Link href="/contact" onClick={() => setIsOpen(false)}>
+                    Start a project
                   </Link>
                 </Button>
               </div>

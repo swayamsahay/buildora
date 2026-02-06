@@ -28,8 +28,13 @@ export async function getLandingPageContent(): Promise<LandingCMSContent> {
 
   const result: LandingCMSContent = {};
 
-  data.forEach((row: any) => {
-    result[row.section as keyof LandingCMSContent] = row.content;
+  if (!data) {
+    return result;
+  }
+
+  data.forEach((row: { section: string; content: unknown }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    result[row.section as keyof LandingCMSContent] = row.content as any;
   });
 
   return result;

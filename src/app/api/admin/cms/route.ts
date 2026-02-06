@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   data.forEach((row) => {
     result[row.section] = row.content;
   });

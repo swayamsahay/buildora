@@ -1,12 +1,11 @@
-import { getLandingPageContent } from "@/lib/cms/getLandingPageContent";
 import LandingClient from "./LandingClient";
+import { motion } from "framer-motion";
 
-export default async function LandingPage() {
-  const cms = await getLandingPageContent();
+export const metadata = {
+  title: "Buildora | Premium Digital Studio",
+  description: "We build digital futures with calm, confident, and cinematic web experiences.",
+};
 
-  return (
-    <section className="max-w-7xl mx-auto px-6">
-      <LandingClient cms={cms} />
-    </section>
-  );
+export default function LandingPage() {
+  return <LandingClient />;
 }

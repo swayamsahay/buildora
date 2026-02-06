@@ -96,7 +96,7 @@ export default function AdminServicesPage() {
         
         <div
           key={service.id}
-          className="space-y-4 rounded-xl border border-slate-800 bg-slate-950 p-6"
+          className="space-y-4 rounded-xl border border-border bg-background p-6"
         >
           <Input
             value={service.title}
