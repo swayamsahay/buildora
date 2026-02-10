@@ -21,7 +21,7 @@ const signals = [
     id: "03",
     icon: Users,
     title: "Unclear Ownership",
-    description: "Projects without decisive leadership or unified vision. We need a partner who can say 'yes' or 'no' with confidence to keep momentum moving forward."
+    description: "Projects without decisive leadership or unified vision. We need a partner who can say &apos;yes&apos; or &apos;no&apos; with confidence to keep momentum moving forward."
   },
   {
     id: "04",

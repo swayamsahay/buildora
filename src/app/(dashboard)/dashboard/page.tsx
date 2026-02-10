@@ -1,86 +1,163 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ticket, Activity, Users, DollarSign } from "lucide-react";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import RequestTimeline from "@/components/dashboard/RequestTimeline";
 
-export default function DashboardPage() {
+export const dynamic = "force-dynamic";
+
+type RequestStatus = "new" | "in_progress" | "completed";
+
+type LatestRequest = {
+  id: string;
+  message: string;
+  status: RequestStatus;
+  created_at: string;
+};
+
+export default async function DashboardPage() {
+  const supabase = await getSupabaseServerClient();
+
+  // 🔐 Auth check
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user || !user.email) {
+    redirect("/login");
+  }
+
+  // 🔹 Latest request
+  const { data: latestRequest } = await supabase
+    .from("contacts")
+    .select("id, message, status, created_at")
+    .eq("email", user.email)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single<LatestRequest>();
+
+  // 🔹 Counts
+  const { count: total } = await supabase
+    .from("contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("email", user.email);
+
+  const { count: inProgress } = await supabase
+    .from("contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("email", user.email)
+    .eq("status", "in_progress");
+
+  const { count: completed } = await supabase
+    .from("contacts")
+    .select("*", { count: "exact", head: true })
+    .eq("email", user.email)
+    .eq("status", "completed");
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Overview</h1>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Total Tickets", value: "12", icon: Ticket, change: "+2 from last week" },
-          { title: "Active Projects", value: "3", icon: Activity, change: "+1 from last month" },
-          { title: "Team Members", value: "8", icon: Users, change: "No change" },
-          { title: "Billing", value: "$1,200", icon: DollarSign, change: "Due in 5 days" },
-        ].map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {stat.change}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="p-4 md:p-8 space-y-8 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          Dashboard
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Track your requests and project progress
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {[
-                { user: "John Doe", action: "created ticket", target: "Login Issue", time: "2 hours ago" },
-                { user: "Sarah Smith", action: "commented on", target: "API Integration", time: "5 hours ago" },
-                { user: "Mike Johnson", action: "completed task", target: "Update Documentation", time: "1 day ago" },
-              ].map((activity, i) => (
-                <div key={i} className="flex items-center">
-                  <div className="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 mr-4">
-                    {activity.user[0]}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {activity.user} <span className="text-slate-500 font-normal">{activity.action}</span> {activity.target}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {activity.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
+      {/* 🔥 Latest Request */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Latest Request</CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {latestRequest ? (
+            <div className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                Submitted on{" "}
+                {new Date(latestRequest.created_at).toLocaleString()}
+              </p>
+
+              <p className="font-medium leading-relaxed">
+                {latestRequest.message}
+              </p>
+
+              <p className="uppercase text-xs font-bold tracking-wider">
+                Status: {latestRequest.status.replace("_", " ")}
+              </p>
+
+              {/* ✅ Status Timeline */}
+              <RequestTimeline status={latestRequest.status} />
+
+              {/* ✅ Trust Signal */}
+              <p className="text-xs text-muted-foreground">
+                Estimated response time:{" "}
+                <span className="font-semibold text-slate-300">
+                  24–48 hours
+                </span>
+              </p>
             </div>
+          ) : (
+            <p className="text-muted-foreground">
+              You haven’t submitted any requests yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 📊 Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              Total Requests
+            </p>
+            <p className="text-2xl font-bold">
+              {total ?? 0}
+            </p>
           </CardContent>
         </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-             <p className="text-sm text-slate-500 mb-4">Shortcuts to common tasks</p>
-             <div className="grid gap-2">
-               <button className="w-full text-left px-4 py-2 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-                 Create New Ticket
-               </button>
-               <button className="w-full text-left px-4 py-2 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-                 Invite Team Member
-               </button>
-               <button className="w-full text-left px-4 py-2 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-                 View Documentation
-               </button>
-             </div>
+
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              In Progress
+            </p>
+            <p className="text-2xl font-bold">
+              {inProgress ?? 0}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              Completed
+            </p>
+            <p className="text-2xl font-bold">
+              {completed ?? 0}
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* 🤝 Trust / Guidance */}
+      <Card>
+        <CardHeader>
+          <CardTitle>What Happens Next?</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground space-y-1">
+          <p>• We review your request</p>
+          <p>• Status moves to In Progress</p>
+          <p>• You’ll see updates right here</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

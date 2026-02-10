@@ -2,13 +2,12 @@
 
 import { useTheme } from "./ThemeProvider";
 import { Moon, Sun } from "lucide-react";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line
@@ -16,11 +15,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   }, []);
 
   const handleClick = () => {
-    if (buttonRef.current) {
-      toggleTheme(buttonRef.current.getBoundingClientRect());
-    } else {
-      toggleTheme();
-    }
+    toggleTheme();
   };
 
   // Prevent hydration mismatch by defaulting to dark (server default) until mounted
@@ -28,7 +23,6 @@ export function ThemeToggle({ className }: { className?: string }) {
 
   return (
     <button
-      ref={buttonRef}
       onClick={handleClick}
       className={cn(
         "group relative p-2 rounded-full text-foreground/70 hover:text-foreground hover:bg-foreground/10 transition-colors",

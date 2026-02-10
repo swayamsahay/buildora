@@ -1,5 +1,4 @@
 import LandingClient from "./LandingClient";
-import { motion } from "framer-motion";
 
 export const metadata = {
   title: "Buildora | Premium Digital Studio",

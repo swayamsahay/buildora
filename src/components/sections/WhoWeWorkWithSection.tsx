@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Rocket, Building2, ChevronRight, Triangle, Circle, Square, Hexagon, Octagon, Diamond, Star, ArrowUpRight, CheckCircle2, ArrowRight } from "lucide-react";
+import { Users, Rocket, Building2, Triangle, Circle, Square, Hexagon, Octagon, Diamond, Star, CheckCircle2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const clients = [

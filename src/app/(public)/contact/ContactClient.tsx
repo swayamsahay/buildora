@@ -1,140 +1,142 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, Send } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 
 export default function ContactClient() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  // ✅ UPDATED SUBMIT HANDLER (LOGS REAL ERROR)
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Failed to submit");
+      }
+
+      setSuccess(true);
+      setName("");
+      setEmail("");
+      setMessage("");
+      router.refresh();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      console.error("CONTACT FORM ERROR:", errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="pt-32 pb-20 px-6 md:px-12 min-h-[80vh] flex flex-col justify-between bg-background relative overflow-hidden">
       <AnimatedBackground />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
+        {/* LEFT */}
         <div>
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-8 block flex items-center gap-2"
-          >
-             <span className="w-2 h-2 rounded-full bg-foreground/20" />
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-8 block flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-foreground/20" />
             Contact
-          </motion.span>
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter uppercase mb-12 text-foreground"
-          >
+          </span>
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter uppercase mb-12">
             Let&apos;s<br />Talk
-          </motion.h1>
+          </h1>
 
-          <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.2, duration: 0.8 }}
+          <p className="text-xl text-muted-foreground mb-8 max-w-md">
+            Have a project in mind? We&apos;d love to hear about it.
+          </p>
+
+          <a
+            href="mailto:hello@buildora.studio"
+            className="text-2xl font-medium border-b pb-2 inline-flex items-center gap-4"
           >
-            <p className="text-xl text-muted-foreground mb-8 max-w-md">
-              Have a project in mind? We&apos;d love to hear about it. Send us a message or email us directly.
-            </p>
-            <motion.a 
-              href="mailto:hello@buildora.studio" 
-              className="text-2xl font-medium text-foreground hover:text-muted-foreground transition-colors inline-flex items-center gap-4 border-b border-muted pb-2 hover:border-foreground mb-12"
-              whileHover={{ x: 4 }}
-              transition={{ duration: 0.2 }}
-            >
-              hello@buildora.studio
-              <motion.span
-                animate={{ x: 0, y: 0 }}
-                whileHover={{ x: 4, y: -4 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ArrowUpRight className="w-6 h-6" />
-              </motion.span>
-            </motion.a>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6">Socials</h3>
-              <ul className="space-y-2">
-                {["Twitter", "Instagram", "LinkedIn"].map((social) => (
-                  <motion.li
-                    key={social}
-                    whileHover={{ x: 8 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <a href="#" className="text-lg text-foreground hover:text-muted-foreground transition-colors">
-                      {social}
-                    </a>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-          </motion.div>
+            hello@buildora.studio
+            <ArrowUpRight className="w-6 h-6" />
+          </a>
         </div>
 
-        <motion.div
-           initial={{ opacity: 0, y: 40 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.3, duration: 0.8 }}
-           className="bg-foreground/5 p-8 md:p-12 rounded-2xl border border-border"
-        >
-          <motion.form
-            onSubmit={(e) => e.preventDefault()}
-            className="space-y-8"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.1 } },
-            }}
-          >
-            <motion.div className="space-y-2" variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}>
-              <label htmlFor="name" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Name</label>
-              <input 
-                id="name" 
-                type="text" 
-                placeholder="What's your name?" 
-                className="w-full bg-transparent border-b border-border py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground focus:shadow-[0_4px_20px_-2px_rgba(255,255,255,0.1)] transition-all duration-300"
+        {/* FORM */}
+        <div className="bg-foreground/5 p-8 md:p-12 rounded-2xl border border-border">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div>
+              <label className="text-xs uppercase tracking-widest">Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full bg-transparent border-b py-4 outline-none"
               />
-            </motion.div>
-            <motion.div className="space-y-2" variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}>
-              <label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email</label>
-              <input 
-                id="email" 
-                type="email" 
-                placeholder="Where can we reach you?" 
-                className="w-full bg-transparent border-b border-border py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground focus:shadow-[0_4px_20px_-2px_rgba(255,255,255,0.1)] transition-all duration-300"
+            </div>
+
+            <div>
+              <label className="text-xs uppercase tracking-widest">Email</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                required
+                className="w-full bg-transparent border-b py-4 outline-none"
               />
-            </motion.div>
-            <motion.div className="space-y-2" variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}>
-              <label htmlFor="message" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</label>
-              <textarea 
-                id="message" 
+            </div>
+
+            <div>
+              <label className="text-xs uppercase tracking-widest">Message</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 rows={4}
-                placeholder="Tell us about your project..." 
-                className="w-full bg-transparent border-b border-border py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground focus:shadow-[0_4px_20px_-2px_rgba(255,255,255,0.1)] transition-all duration-300 resize-none"
+                required
+                className="w-full bg-transparent border-b py-4 outline-none resize-none"
               />
-            </motion.div>
-            
-            <motion.button 
-              type="button"
-              className="group w-full flex items-center justify-between bg-foreground text-background h-16 px-8 rounded-full font-bold text-lg"
-              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
+            </div>
+
+            {success && (
+              <p className="text-green-500 text-sm">
+                Message sent successfully ✔
+              </p>
+            )}
+
+            {error && (
+              <p className="text-red-500 text-sm">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-between bg-foreground text-background h-16 px-8 rounded-full font-bold text-lg disabled:opacity-60"
             >
-              Send Message
-              <motion.span
-                animate={{ x: 0 }}
-                whileHover={{ x: 4 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Send className="w-5 h-5" />
-              </motion.span>
-            </motion.button>
-          </motion.form>
-        </motion.div>
+              {loading ? "Sending…" : "Send Message"}
+              <Send className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

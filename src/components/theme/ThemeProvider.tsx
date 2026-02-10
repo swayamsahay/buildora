@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
-import { ThemeTransition } from "./ThemeTransition";
 import { MotionConfig } from "framer-motion";
 
 interface ThemeContextType {
-  toggleTheme: (rect?: DOMRect) => void;
+  toggleTheme: () => void;
   isTransitioning: boolean;
 }
 
@@ -34,10 +33,8 @@ function ThemeController({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useNextTheme();
   // const [isTransitioning, setIsTransitioning] = React.useState(false);
   const isTransitioning = false;
-  const [targetTheme, setTargetTheme] = React.useState<string | undefined>(undefined);
-  const [triggerRect, setTriggerRect] = React.useState<DOMRect | null>(null);
 
-  const toggleTheme = (rect?: DOMRect) => {
+  const toggleTheme = () => {
     // Instant switch
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
@@ -45,13 +42,6 @@ function ThemeController({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ toggleTheme, isTransitioning }}>
-      {/* 
-      <ThemeTransition 
-        active={isTransitioning} 
-        targetTheme={targetTheme || (theme === "dark" ? "light" : "dark")}
-        triggerRect={triggerRect}
-      />
-      */}
       {children}
     </ThemeContext.Provider>
   );

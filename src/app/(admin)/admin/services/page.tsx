@@ -1,179 +1,107 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Plus, Pencil } from "lucide-react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-type Service = {
+interface ServiceItem {
   id: string;
   title: string;
   description: string;
-  is_active?: boolean;
-};
+  status?: string;
+  created_at?: string;
+}
 
-export default function AdminServicesPage() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function AdminServicesPage() {
+  const supabase = await getSupabaseServerClient();
 
-  // NEW SERVICE STATE
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-
-  /* =========================
-     LOAD SERVICES
-  ========================= */
-  useEffect(() => {
-    async function loadServices() {
-      try {
-        const res = await fetch("/api/services");
-        const data = await res.json();
-        setServices(data);
-      } catch (err) {
-        console.error("Failed to load services", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadServices();
-  }, []);
-
-  /* =========================
-     UPDATE LOCAL STATE
-  ========================= */
-  function updateService(
-    index: number,
-    field: keyof Service,
-    value: string
-  ) {
-    const updated = [...services];
-    updated[index] = {
-      ...updated[index],
-      [field]: value,
-    };
-    setServices(updated);
-  }
-
-  if (loading) {
-    return <div className="p-8">Loading services…</div>;
-  }
+  const { data: services, error } = await supabase
+    .from("services")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   return (
-    <div className="max-w-5xl space-y-10 p-8">
-      <h1 className="text-3xl font-bold">Services CMS</h1>
-
-      {/* =========================
-          ADD NEW SERVICE
-      ========================= */}
-      <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950 p-6">
-        <h2 className="text-xl font-semibold">Add New Service</h2>
-
-        <Input
-          placeholder="Service title"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-        />
-
-        <Textarea
-          placeholder="Service description"
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-        />
-
-        <Button
-  variant="destructive"  disabled>
-  
- Delete (Coming Soon)
-</Button>
-
+    <div className="container mx-auto py-10 max-w-7xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Services</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your service offerings and descriptions.
+          </p>
+        </div>
+        <Link href="/admin/services/new">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Plus className="mr-2 h-4 w-4" /> Add Service
+          </Button>
+        </Link>
       </div>
 
-      {/* =========================
-          EXISTING SERVICES
-      ========================= */}
-      {services.map((service, index) => (
-        
-        <div
-          key={service.id}
-          className="space-y-4 rounded-xl border border-border bg-background p-6"
-        >
-          <Input
-            value={service.title}
-            onChange={(e) =>
-              updateService(index, "title", e.target.value)
-            }
-            placeholder="Service title"
-          />
-
-          <Button
-  variant="destructive"
-  onClick={async () => {
-    if (!confirm("Delete this service?")) return;
-
-    const res = await fetch("/api/admin/services/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: service.id }),
-    });
-
-    if (!res.ok) {
-      alert("Delete failed");
-      return;
-    }
-
-    setServices((prev) =>
-      prev.filter((s) => s.id !== service.id)
-    );
-  }}
->
-  Delete
-</Button>
-
-     
-
-
-          <Textarea
-            value={service.description}
-            onChange={(e) =>
-              updateService(index, "description", e.target.value)
-            }
-            placeholder="Service description"
-          />
-
-          <Button
-            onClick={async () => {
-              try {
-                const res = await fetch("/api/admin/services", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    id: service.id,
-                    title: service.title,
-                    description: service.description,
-                  }),
-                });
-
-                if (!res.ok) {
-                  const err = await res.json();
-                  console.error("Save failed:", err);
-                  alert("Save failed");
-                  return;
-                }
-
-                alert("Saved successfully");
-              } catch (error) {
-                console.error("Request error:", error);
-                alert("Save failed");
-              }
-            }}
-          >
-            Save
-          </Button>
+      {/* Error State */}
+      {error && (
+        <div className="rounded-md bg-destructive/15 p-4 text-destructive mb-6">
+          <div className="flex items-center gap-2 font-medium">
+            <span>Error loading services:</span>
+            <span>{error.message}</span>
+          </div>
         </div>
-      ))}
+      )}
+
+      {/* Data Table */}
+      <div className="rounded-md border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">Service Name</TableHead>
+              <TableHead className="w-[400px]">Description</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {services?.map((service: ServiceItem) => (
+              <TableRow key={service.id}>
+                <TableCell className="font-medium">
+                  {service.title}
+                </TableCell>
+                <TableCell className="text-muted-foreground truncate max-w-[400px]">
+                  {service.description}
+                </TableCell>
+                <TableCell>
+                  <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                    Active
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Link href={`/admin/services/${service.id}`}>
+                      <Button variant="ghost" size="sm">
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                      </Button>
+                    </Link>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {(!services || services.length === 0) && !error && (
+              <TableRow>
+                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                  No services found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

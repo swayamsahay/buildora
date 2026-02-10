@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 
@@ -112,7 +111,7 @@ export default function Hero() {
                                 <span className="text-purple-600 dark:text-purple-400">import</span>
                                 <span className="text-slate-700 dark:text-slate-300">{`{ Future }`}</span>
                                 <span className="text-purple-600 dark:text-purple-400">from</span>
-                                <span className="text-green-600 dark:text-green-400">'@buildora/core'</span>
+                                <span className="text-green-600 dark:text-green-400">&apos;@buildora/core&apos;</span>
                             </div>
                             <div className="flex gap-4 text-slate-500">
                                 <span>02</span>
@@ -131,13 +130,13 @@ export default function Hero() {
                             <div className="flex gap-4 text-slate-500 pl-8">
                                 <span>04</span>
                                 <span className="text-slate-400">performance:</span>
-                                <span className="text-orange-400">'max'</span>
+                                <span className="text-orange-400">&apos;max&apos;</span>
                                 <span className="text-slate-300">,</span>
                             </div>
                             <div className="flex gap-4 text-slate-500 pl-8">
                                 <span>05</span>
                                 <span className="text-slate-400">aesthetics:</span>
-                                <span className="text-orange-400">'premium'</span>
+                                <span className="text-orange-400">&apos;premium&apos;</span>
                             </div>
                             <div className="flex gap-4 text-slate-500">
                                 <span>06</span>

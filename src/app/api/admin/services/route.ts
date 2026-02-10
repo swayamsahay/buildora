@@ -1,64 +1,27 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server"; // ✅ 1. Correct the name
 
-// CREATE + UPDATE
-export async function POST(req: Request) {
-  const body = await req.json();
+// ❌ DO NOT put 'const supabase = ...' here anymore.
+// In Next.js 16, it must be inside the function below.
 
-  // CREATE
-  if (!body.id) {
+export async function GET() {
+  // ✅ 2. Initialize and await the client INSIDE the function
+  const supabase = await getSupabaseServerClient();
+
+  try {
     const { data, error } = await supabase
       .from("services")
-      .insert({
-        title: body.title,
-        description: body.description,
-        is_active: true,
-      })
-      .select()
-      .single();
+      .select("*")
+      .order("sort_order", { ascending: true });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (error) throw error;
 
     return NextResponse.json(data);
-  }
-
-  // UPDATE
-  const { error } = await supabase
-    .from("services")
-    .update({
-      title: body.title,
-      description: body.description,
-    })
-    .eq("id", body.id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
-}
-
-// DELETE
-export async function DELETE(req: Request) {
-  const { id } = await req.json();
-
-  if (!id) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     return NextResponse.json(
-      { error: "Service ID required" },
-      { status: 400 }
+      { error: errorMessage },
+      { status: 500 }
     );
   }
-
-  const { error } = await supabase
-    .from("services")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true });
 }

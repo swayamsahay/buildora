@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server"; // ✅ 1. Corrected name
 
 export type LandingCMSContent = {
   hero?: {
@@ -15,11 +15,16 @@ export type LandingCMSContent = {
 };
 
 export async function getLandingPageContent(): Promise<LandingCMSContent> {
+  // ✅ 2. Initialize and await the client INSIDE the function
+  // This is required because Next.js 16 needs to await request headers/cookies
+  const supabase = await getSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("site_content")
     .select("section, content")
-    .eq("page", "/")
-    .eq("is_active", true);
+    .eq("is_active", true); 
+    // Note: I removed .eq("page", "/") because your previous SQL fixes 
+    // made 'page' optional/nullable. This ensures content still loads.
 
   if (error) {
     console.error("CMS fetch error:", error);

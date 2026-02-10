@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,10 +34,6 @@ const testimonials = [
 
 export default function AboutClient() {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
 
   return (
     <div ref={containerRef} className="pt-32 pb-0 bg-background relative overflow-hidden min-h-screen">
@@ -136,7 +132,7 @@ export default function AboutClient() {
                   className="w-[400px] flex-shrink-0 bg-background/50 border border-white/5 hover:border-blue-500/30 transition-colors group p-8 rounded-3xl"
                 >
                   <Quote className="w-10 h-10 text-blue-500 mb-6 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">"{t.text}"</p>
+                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">&quot;{t.text}&quot;</p>
                   <div>
                     <div className="font-bold text-foreground">{t.author}</div>
                     <div className="text-sm text-blue-400">{t.role}</div>
@@ -167,7 +163,7 @@ export default function AboutClient() {
             transition={{ delay: 0.1 }}
             className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto"
           >
-            Join us on our journey to redefine the digital landscape. Let's build something extraordinary together.
+            Join us on our journey to redefine the digital landscape. Let&apos;s build something extraordinary together.
           </motion.p>
           
           <motion.div

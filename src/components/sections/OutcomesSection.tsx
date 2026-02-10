@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useInView, useSpring, useMotionValue } from "framer-motion";
-import { Zap, Layers, BarChart3, ArrowUpRight, Activity, CheckCircle2 } from "lucide-react";
+import { motion, useInView, useSpring, useMotionValue, AnimatePresence } from "framer-motion";
+import { Zap, Layers, Activity, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const outcomes = [

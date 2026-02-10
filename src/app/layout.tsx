@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 import SmoothScroll from "@/components/ui/SmoothScroll";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           <ThemeProvider>
             {children}
             <ScrollToTop />
+            <Toaster />
           </ThemeProvider>
         </SmoothScroll>
       </body>

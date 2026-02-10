@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 const services = [
@@ -37,13 +37,6 @@ export default function ServicesSection() {
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (activeService) {
-      const service = services.find((s) => s.id === activeService);
-      if (service) setDisplayedImage(service.image);
-    }
-  }, [activeService]);
-
   const handleMouseMove = (e: React.MouseEvent) => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -69,7 +62,10 @@ export default function ServicesSection() {
           {services.map((service) => (
             <motion.div
               key={service.id}
-              onMouseEnter={() => setActiveService(service.id)}
+              onMouseEnter={() => {
+                setActiveService(service.id);
+                setDisplayedImage(service.image);
+              }}
               onMouseLeave={() => setActiveService(null)}
               className="group relative border-t border-foreground/10 py-12 cursor-pointer flex items-center justify-between z-10"
             >

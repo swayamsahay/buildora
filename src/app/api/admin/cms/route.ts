@@ -1,86 +1,52 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-/**
- * GET → fetch landing page CMS
- */
+// GET — fetch all CMS content
 export async function GET() {
+  const supabase = await getSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("site_content")
-    .select("section, content")
-    .eq("page", "/")
-    .eq("is_active", true);
+    .select("*");
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 
-  const result: Record<string, unknown> = {};
-  data.forEach((row) => {
-    result[row.section] = row.content;
-  });
-
-  return NextResponse.json(result);
+  return NextResponse.json(data ?? []);
 }
 
-/**
- * POST → save landing page CMS
- */
-export async function POST(req: Request) {
+// PATCH — update CMS section content
+export async function PATCH(req: Request) {
+  const supabase = await getSupabaseServerClient();
+
   const body = await req.json();
+  const { section, content } = body;
 
-  const updates = [
-    {
-      section: "hero",
-      content: {
-        heading: body.heroHeading,
-        subheading: body.heroSubheading,
-      },
-    },
-    {
-      section: "cta",
-      content: {
-        button_text: body.ctaText,
-        button_link: body.ctaLink,
-      },
-    },
-  ];
-
-  for (const item of updates) {
-    // 1️⃣ Try UPDATE first
-    const { data, error } = await supabase
-      .from("site_content")
-      .update({
-        content: item.content,
-      })
-      .eq("page", "/")
-      .eq("section", item.section)
-      .select()
-      .single();
-
-    // 2️⃣ If no row exists → INSERT
-    if (error || !data) {
-      const { error: insertError } = await supabase
-        .from("site_content")
-        .insert({
-          page: "/",
-          section: item.section,
-          content: item.content,
-          is_active: true,
-        });
-
-      if (insertError) {
-        console.error("CMS save error:", insertError);
-        return new Response(
-          JSON.stringify({ error: insertError.message }),
-          { status: 500 }
-        );
-      }
-    }
+  if (!section || !content) {
+    return NextResponse.json(
+      { error: "Missing section or content" },
+      { status: 400 }
+    );
   }
 
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200 }
-  );
+  const { error } = await supabase
+    .from("site_content")
+    .update({
+      content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("section", section);
+
+  if (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ success: true });
 }

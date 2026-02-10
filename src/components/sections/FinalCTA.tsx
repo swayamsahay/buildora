@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useMotionValue, useMotionTemplate } from "framer-motion";
 import Link from "next/link";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 function GridBackground() {
   return (
@@ -90,7 +89,7 @@ export default function FinalCTA() {
               className="text-xl md:text-2xl text-zinc-600 dark:text-zinc-400 max-w-lg leading-relaxed mb-12"
             >
               We craft digital experiences that define industries. 
-              Don't just compete. Dominate.
+              Don&apos;t just compete. Dominate.
             </motion.p>
 
             <motion.div

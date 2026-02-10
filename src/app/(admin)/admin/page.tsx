@@ -1,79 +1,142 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Ticket, DollarSign, Activity, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Users,
+  Boxes,
+  Mail,
+  Activity,
+  ArrowUpRight,
+  Globe,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-export default function AdminDashboardPage() {
+type StatColor = "blue" | "orange" | "purple" | "emerald" | "yellow";
+
+export default async function AdminDashboardPage() {
+  const supabase = await getSupabaseServerClient();
+
+  const [
+    servicesRes,
+    totalContactsRes,
+    newContactsRes,
+    inProgressContactsRes,
+    completedContactsRes,
+    profilesRes
+  ] = await Promise.all([
+    supabase.from("services").select("*", { count: "exact", head: true }),
+    supabase.from("contacts").select("*", { count: "exact", head: true }),
+    supabase.from("contacts").select("*", { count: "exact", head: true }).or("status.eq.new,status.is.null"),
+    supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "in_progress"),
+    supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "completed"),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+  ]);
+
+  const { data: lastCMSUpdate } = await supabase
+    .from("cms")
+    .select("created_at")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Workflow Breakdown
+  const workflow = {
+    new: newContactsRes.count ?? 0,
+    in_progress: inProgressContactsRes.count ?? 0,
+    completed: completedContactsRes.count ?? 0,
+    total: totalContactsRes.count ?? 0
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Admin Overview</h1>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Total Revenue", value: "$45,231.89", icon: DollarSign, change: "+20.1% from last month" },
-          { title: "Subscriptions", value: "+2350", icon: Users, change: "+180.1% from last month" },
-          { title: "Active Tickets", value: "+12,234", icon: Ticket, change: "+19% from last month" },
-          { title: "Active Now", value: "+573", icon: Activity, change: "+201 since last hour" },
-        ].map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {stat.change}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="max-w-[1600px] mx-auto space-y-8 p-4 md:p-8 min-h-screen text-slate-100">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-8 border-slate-800">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="bg-blue-600 p-1 rounded">
+              <ShieldCheck className="text-white h-4 w-4" />
+            </div>
+            <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
+              Administrator Portal
+            </span>
+            <div className="flex items-center gap-2 ml-4 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">System Operational</span>
+            </div>
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            Buildora <span className="text-blue-500">HQ</span>
+          </h1>
+          {lastCMSUpdate && (
+             <p className="text-xs text-slate-500 mt-2 font-mono">
+                Last updated: {new Date(lastCMSUpdate.created_at).toLocaleString()}
+             </p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link href="/">
+            <Button variant="outline" className="gap-2">
+              <Globe className="h-4 w-4" /> Visit Site
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-             <div className="h-[350px] flex items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-900/50 rounded-md border border-dashed border-slate-200 dark:border-slate-800">
-                Chart Placeholder (Recharts or similar would go here)
-             </div>
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Sales</CardTitle>
-            <p className="text-sm text-slate-500">
-              You made 265 sales this month.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-8">
-              {[
-                { name: "Olivia Martin", email: "olivia.martin@email.com", amount: "+$1,999.00" },
-                { name: "Jackson Lee", email: "jackson.lee@email.com", amount: "+$39.00" },
-                { name: "Isabella Nguyen", email: "isabella.nguyen@email.com", amount: "+$299.00" },
-                { name: "William Kim", email: "will@email.com", amount: "+$99.00" },
-                { name: "Sofia Davis", email: "sofia.davis@email.com", amount: "+$39.00" },
-              ].map((sale, i) => (
-                <div key={i} className="flex items-center">
-                  <div className="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 mr-4">
-                    {sale.name[0]}
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">{sale.name}</p>
-                    <p className="text-sm text-slate-500">{sale.email}</p>
-                  </div>
-                  <div className="ml-auto font-medium">{sale.amount}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* PRIMARY STATS */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Link href="/admin/services" className="block">
+          <StatCard title="Total Services" value={servicesRes.count ?? 0} icon={Boxes} color="blue" description="Live on site" clickable />
+        </Link>
+        <Link href="/admin/requests" className="block">
+          <StatCard title="Total Leads" value={workflow.total} icon={Mail} color="orange" description="Lifetime inquiries" clickable />
+        </Link>
+        <StatCard title="Active Users" value={profilesRes.count ?? 0} icon={Users} color="purple" description="System access" />
+        <StatCard title="CMS Integrity" value="Healthy" icon={Activity} color="emerald" description={lastCMSUpdate ? `Sync: ${new Date(lastCMSUpdate.created_at).toLocaleDateString()}` : "Online"} />
+      </div>
+
+      {/* WORKFLOW BREAKDOWN */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Link href="/admin/requests">
+          <StatCard title="New Requests" value={workflow.new} icon={AlertCircle} color="blue" description="Needs immediate action" clickable />
+        </Link>
+        <Link href="/admin/requests">
+          <StatCard title="In Progress" value={workflow.in_progress} icon={Clock} color="yellow" description="Currently being handled" clickable />
+        </Link>
+        <Link href="/admin/requests">
+          <StatCard title="Completed" value={workflow.completed} icon={CheckCircle2} color="emerald" description="Successfully resolved" clickable />
+        </Link>
       </div>
     </div>
+  );
+}
+
+function StatCard({ title, value, icon: Icon, description, color, clickable }: { title: string; value: number | string; icon: React.ElementType; description: string; color: StatColor; clickable?: boolean; }) {
+  const colors: Record<StatColor, string> = {
+    blue: "bg-blue-500/10 text-blue-400",
+    orange: "bg-orange-500/10 text-orange-400",
+    purple: "bg-purple-500/10 text-purple-400",
+    emerald: "bg-emerald-500/10 text-emerald-400",
+    yellow: "bg-yellow-500/10 text-yellow-400",
+  };
+
+  return (
+    <Card className={`border-slate-800 bg-slate-900/60 ${clickable ? "cursor-pointer hover:border-blue-500 hover:bg-slate-900/80" : ""}`}>
+      <CardContent className="p-6">
+        <div className="flex justify-between">
+          <div className={`p-3 rounded-xl ${colors[color]}`}><Icon className="h-6 w-6" /></div>
+          <ArrowUpRight className={`h-4 w-4 ${clickable ? "text-blue-500" : "text-slate-600"}`} />
+        </div>
+        <div className="mt-4">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{title}</p>
+          <h2 className="text-3xl font-black text-white mt-1">{value}</h2>
+          <p className="text-[11px] text-slate-400 mt-1 font-medium">{description}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

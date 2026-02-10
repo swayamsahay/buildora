@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 
 // --- Magnetic Effect ---
 // Updated to support custom strength prop
-export function Magnetic({ children, className, strength = 0.35 }: { children: React.ReactNode; className?: string; strength?: number }) {
+export function Magnetic({ children, className, strength: _strength = 0.35 }: { children: React.ReactNode; className?: string; strength?: number }) {
+  // Suppress unused var warning
+  void _strength;
   const ref = useRef<HTMLDivElement>(null);
 
   return (
@@ -45,6 +47,8 @@ export function IconMotion({
   className?: string;
   direction?: "right" | "up-right" | "up";
 }) {
+  // Suppress unused var warning
+  void direction;
   return (
     <div
       className={cn("inline-block", className)}

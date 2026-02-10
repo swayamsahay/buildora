@@ -6,7 +6,7 @@ interface ThemeTransitionProps {
   triggerRect: DOMRect | null;
 }
 
-export function ThemeTransition({ active, targetTheme, triggerRect }: ThemeTransitionProps) {
+export function ThemeTransition({}: ThemeTransitionProps) {
   // Disabled
   return null;
 }

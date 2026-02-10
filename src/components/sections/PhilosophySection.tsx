@@ -1,15 +1,23 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { ArrowUpRight, Scale, Zap, ShieldCheck, Component } from "lucide-react";
+import { Scale, Zap, ShieldCheck, Component } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const principles = [
+interface Principle {
+  title: string;
+  subtitle: string;
+  description: string;
+  icon: React.ElementType;
+  color: string;
+}
+
+const principles: Principle[] = [
   {
     title: "Clarity",
     subtitle: "Signal over noise.",
-    description: "We strip away the non-essential. Every pixel must earn its place. If it doesn't solve a problem, it's decoration.",
+    description: "We strip away the non-essential. Every pixel must earn its place. If it doesn&apos;t solve a problem, it&apos;s decoration.",
     icon: Zap,
     color: "bg-blue-500/10 text-blue-500 border-blue-500/20"
   },
@@ -36,7 +44,7 @@ const principles = [
   }
 ];
 
-function PrincipleCard({ item, index }: { item: any; index: number }) {
+function PrincipleCard({ item, index }: { item: Principle; index: number }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -88,15 +96,9 @@ function PrincipleCard({ item, index }: { item: any; index: number }) {
 
 export default function PhilosophySection() {
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
 
   return (
-    <section ref={containerRef} className="relative pt-24 pb-32 md:pt-32 md:pb-48 bg-gradient-to-b from-slate-50 to-zinc-50 dark:from-slate-950 dark:to-zinc-950 overflow-hidden">
+    <section ref={containerRef} className="py-32 px-6 md:px-12 bg-background relative overflow-hidden">
       {/* Background Grid */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.1)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#333_1px,transparent_1px),linear-gradient(to_bottom,#333_1px,transparent_1px)] bg-[size:40px_40px]" />

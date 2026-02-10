@@ -3,57 +3,97 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Ticket, Settings, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Settings,
+  LogOut,
+  MessageSquare,
+  X,
+} from "lucide-react";
+
+/* ✅ ADD PROPS TYPE */
+type SidebarProps = {
+  open: boolean;
+  onClose: () => void;
+};
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/tickets", label: "My Tickets", icon: Ticket },
+  { href: "/dashboard/requests", label: "My Requests", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <div className="hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 md:flex md:w-64 md:flex-col">
-      <div className="flex h-16 items-center border-b border-slate-200 px-6 dark:border-slate-800">
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold text-slate-900 dark:text-slate-50">
-            Buildora
-          </span>
-        </Link>
-      </div>
-      <div className="flex flex-1 flex-col overflow-y-auto py-4">
-        <nav className="flex-1 space-y-1 px-2">
+    <>
+      {/* Mobile overlay */}
+      {open && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed z-50 inset-y-0 left-0 w-64 bg-[#0a0a0a] border-r border-slate-800 flex flex-col transition-transform duration-300",
+          open ? "translate-x-0" : "-translate-x-full",
+          "md:translate-x-0 md:static"
+        )}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-slate-800 px-6">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <img src="/logo.png" className="h-8 w-8" alt="Logo" />
+            <span className="font-black uppercase tracking-tight">Buildora</span>
+          </Link>
+
+          {/* Close button (mobile) */}
+          <button
+            onClick={onClose}
+            className="md:hidden text-slate-400 hover:text-white"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <nav className="flex-1 px-3 py-6 space-y-1">
           {sidebarLinks.map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const isActive =
+              pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const Icon = link.icon;
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={onClose}
                 className={cn(
-                  "group flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                  "flex items-center px-3 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-colors",
                   isActive
-                    ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+                    ? "bg-blue-600/10 text-white border-l-2 border-blue-500"
+                    : "text-slate-500 hover:text-white"
                 )}
               >
-                <link.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                <Icon className="mr-3 h-4 w-4" />
                 {link.label}
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto border-t border-slate-200 px-2 pt-4 dark:border-slate-800">
+
+        <div className="border-t border-slate-800 px-3 py-4">
           <Link
             href="/login"
-            className="group flex items-center rounded-md px-2 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+            className="flex items-center px-3 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 hover:text-red-300 transition-colors"
           >
-            <LogOut className="mr-3 h-5 w-5 flex-shrink-0" />
+            <LogOut className="mr-3 h-4 w-4" />
             Log out
           </Link>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }
