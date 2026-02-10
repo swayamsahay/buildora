@@ -1,17 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Buildora
 
-## Getting Started
+Buildora is a full-stack SaaS platform designed for web consulting studios.  
+It allows users to submit project requests and track progress, while admins manage services, CMS content, and client requests in real time.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+### User
+- Secure authentication with email verification
+- Submit project requests
+- Track request status (New → In Progress → Completed)
+- Real-time updates
+- Email confirmation on request submission
+- Mobile-friendly dashboard
+
+### Admin
+- Admin-only dashboard
+- Manage services & CMS content
+- View and update client requests
+- Role-based access control
+- Real-time request updates
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS
+- **Backend:** Supabase (Auth, Database, RLS)
+- **Email:** EmailJS
+- **Deployment:** Railway
+- **Auth:** Email + password with verification
+- **State:** Server Components by default
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env.local` file and add:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+NEXT_PUBLIC_EMAILJS_SERVICE_ID=
+NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=
+NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
